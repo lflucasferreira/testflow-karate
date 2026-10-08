@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.testflow</groupId>
+    <artifactId>testflow-karate</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>testflow-karate</name>
+    <description>Karate API automation suite for TestFlow</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>17</maven.compiler.release>
+        <karate.version>1.5.2</karate.version>
+        <junit.version>5.11.4</junit.version>
+        <maven.surefire.version>3.5.2</maven.surefire.version>
+        <!-- Tag filter: smoke | api | regression | empty = all -->
+        <karate.options></karate.options>
+        <karate.env>local</karate.env>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.karatelabs</groupId>
+            <artifactId>karate-junit5</artifactId>
+            <version>${karate.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+            <!-- Allow .feature next to Java runners if needed -->
+            <testResource>
+                <directory>src/test/java</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+                <configuration>
+                    <!-- Default: AllRunner (respects -Dkarate.options / Maven profiles).
+                         Suite runners: mvn test -Dtest=SmokeRunner|ApiRunner|AuthRunner -->
+                    <includes>
+                        <include>**/AllRunner.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <karate.options>${karate.options}</karate.options>
+                        <karate.env>${karate.env}</karate.env>
+                        <BASE_URL>${env.BASE_URL}</BASE_URL>
+                        <DEMO_EMAIL>${env.DEMO_EMAIL}</DEMO_EMAIL>
+                        <DEMO_PASSWORD>${env.DEMO_PASSWORD}</DEMO_PASSWORD>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>smoke</id>
+            <properties>
+                <karate.options>--tags @smoke</karate.options>
+            </properties>
+        </profile>
+        <profile>
+            <id>api</id>
+            <properties>
+                <karate.options>--tags @api</karate.options>
+            </properties>
+        </profile>
+        <profile>
+            <id>regression</id>
+            <properties>
+                <karate.options>--tags @regression</karate.options>
+            </properties>
+        </profile>
+        <profile>
+            <id>auth</id>
+            <properties>
+                <karate.options>--tags @auth</karate.options>
+            </properties>
+        </profile>
+        <profile>
+            <id>ci</id>
+            <properties>
+                <karate.env>ci</karate.env>
+            </properties>
+        </profile>
+    </profiles>
+</project>
